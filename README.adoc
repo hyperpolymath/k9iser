@@ -1,0 +1,46 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+= K9iser
+Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+:toc: left
+:icons: font
+
+== What Is This?
+
+K9iser wraps existing configuration files and deployment scripts into
+**self-validating K9 contracts** — files that validate themselves before executing.
+
+K9 (Self-Validating Components) enforces a must-just-nickel contract triad
+with tiered safety levels (Kennel/Yard/Hunt). K9iser applies this to existing
+infrastructure.
+
+== How It Works
+
+Point K9iser at your configs in `k9iser.toml`. K9iser:
+
+1. Analyses existing configs (YAML, TOML, JSON, HCL)
+2. Generates K9 contracts with embedded validation rules
+3. Adds tiered safety: Kennel (safe), Yard (moderate), Hunt (powerful)
+4. Provides cryptographic signing and verification
+5. Self-validation runs before any deployment
+
+== Key Value
+
+* **Configs that validate themselves** — no external validator needed
+* **Tiered safety levels** — sandbox dangerous operations automatically
+* **Signed contracts** — cryptographic proof of authorised changes
+* **Deploy with confidence** — invalid configs caught before execution
+
+== Architecture
+
+Follows the hyperpolymath -iser pattern:
+manifest -> Idris2 ABI proof -> Zig FFI bridge -> target language codegen.
+Part of the https://github.com/hyperpolymath/iseriser[-iser family].
+
+== Status
+
+**Pre-alpha.** Architecture defined, scaffolding in place, codegen pending.
+
+== License
+
+SPDX-License-Identifier: PMPL-1.0-or-later
