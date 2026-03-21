@@ -11,29 +11,32 @@
   (project-context
     (name "k9iser")
     (description "Analyse config files, infer constraints, generate K9 contracts, validate, and attest compliance")
-    (status "scaffold")
-    (priority "—")
+    (status "alpha")
+    (priority "high")
     (ecosystem "-iser family (https://github.com/hyperpolymath/iseriser)"))
 
   (current-position
-    (phase "initial-scaffold")
-    (completion-percentage 8)
-    (milestone "Architecture defined, CLI scaffolded, Idris2 ABI bespoke types written, Zig FFI bespoke stubs written, documentation complete"))
+    (phase "phase-1-complete")
+    (completion-percentage 45)
+    (milestone "Phase 1 complete — config parser, constraint inference, K9 codegen, validation")
+    (what-changed
+      "2026-03-21: Phase 1 complete. Multi-format config parser, constraint inference engine, K9 contract codegen, validation engine, bespoke manifest parsing. Integration tests passing."))
 
   (route-to-mvp
-    (step 1 "Implement multi-format config parser (TOML, YAML, JSON, Nickel) in bridges/")
-    (step 2 "Build constraint inference engine in core/ — must, trust, dust, intend")
-    (step 3 "Implement K9 contract codegen — emit .k9.ncl files from inferred constraints")
-    (step 4 "Build validation engine — check configs against K9 contracts")
-    (step 5 "Implement cryptographic attestation for validation results")
-    (step 6 "Write Idris2 ABI proofs for constraint completeness and soundness")
-    (step 7 "Build Zig FFI bridge for validation engine hot path")
-    (step 8 "Integration tests with real-world config examples"))
+    (step 1 "DONE — Multi-format config parser (TOML, YAML, JSON, Nickel)")
+    (step 2 "DONE — Constraint inference engine (must/trust/dust/intend)")
+    (step 3 "DONE — K9 contract codegen emitting .k9.ncl files")
+    (step 4 "DONE — Validation engine checking configs against contracts")
+    (step 5 "DONE — Bespoke manifest parsing and CLI")
+    (step 6 "TODO — Cryptographic attestation for validation results")
+    (step 7 "TODO — Idris2 ABI proofs for constraint completeness and soundness")
+    (step 8 "TODO — Zig FFI bridge for validation engine hot path")
+    (step 9 "TODO — PanLL panel and BoJ cartridge integration"))
 
   (blockers-and-issues
-    (none "Project is in scaffold phase — no blockers yet"))
+    (note "Nickel parser requires nickel binary for validation — structural checks only for now"))
 
   (critical-next-actions
-    (action "Implement TOML config parser and structural analysis in bridges/")
-    (action "Define the unified config AST that all format parsers produce")
-    (action "Build first must-rule inference from observed config patterns")))
+    (action "Implement cryptographic attestation for validation results")
+    (action "Write Idris2 ABI proofs for constraint completeness")
+    (action "Build Zig FFI bridge for hot-path validation")))
