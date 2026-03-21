@@ -1,0 +1,89 @@
+<!-- SPDX-License-Identifier: PMPL-2.0-or-later -->
+<!-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>k9iser — self-validating K9 contracts from config files</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d1117;color:#c9d1d9;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;line-height:1.6;padding:2rem}
+.container{max-width:720px;margin:0 auto}
+h1,h2,h3{font-family:"JetBrains Mono",Consolas,"Courier New",monospace;color:#58a6ff}
+h1{font-size:2.2rem;margin-bottom:.3rem}
+.tagline{color:#8b949e;font-size:1.1rem;margin-bottom:1.5rem}
+.badge{display:inline-block;padding:.2rem .5rem;border-radius:3px;font-size:.75rem;font-weight:600;margin-right:.4rem;text-decoration:none}
+.badge-license{background:#1f6feb;color:#fff}
+.badge-crates{background:#fc8d62;color:#fff}
+.badges{margin-bottom:1.8rem}
+pre{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:1rem;overflow-x:auto;margin:1rem 0;color:#e6edf3;font-size:.9rem}
+code{font-family:"JetBrains Mono",Consolas,monospace}
+h2{font-size:1.3rem;margin-top:1.8rem;margin-bottom:.6rem;border-bottom:1px solid #21262d;padding-bottom:.3rem}
+ul{margin:.5rem 0 .5rem 1.5rem}
+li{margin:.3rem 0}
+a{color:#58a6ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.links{margin-top:2rem;display:flex;gap:1rem;flex-wrap:wrap}
+.links a{border:1px solid #30363d;padding:.4rem 1rem;border-radius:6px;font-size:.9rem}
+.links a:hover{border-color:#58a6ff}
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid #21262d;color:#484f58;font-size:.8rem}
+.pillars{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:1rem 0}
+.pillar{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:.8rem}
+.pillar strong{color:#58a6ff}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>k9iser</h1>
+<p class="tagline">Analyse configs, infer constraints, generate K9 contracts with cryptographic attestation.</p>
+<div class="badges">
+  <a class="badge badge-license" href="https://github.com/hyperpolymath/palimpsest-license">PMPL-2.0</a>
+  <a class="badge badge-crates" href="https://crates.io/crates/k9iser">crates.io</a>
+</div>
+
+<h2>Install</h2>
+<pre><code>cargo install k9iser</code></pre>
+
+<h2>What It Does</h2>
+<p>k9iser analyses TOML, YAML, JSON, and Nickel configuration files, infers the implicit
+constraints they embody, generates formal <a href="https://github.com/hyperpolymath/contractile">K9 contracts</a>,
+validates configs against those contracts, and attests compliance with cryptographic signatures.</p>
+<p>Think "JSON Schema on steroids with cryptographic attestation."</p>
+
+<h2>The Four Pillars</h2>
+<div class="pillars">
+  <div class="pillar"><strong>must</strong> — Required constraints, value ranges, type invariants. Violation = hard failure.</div>
+  <div class="pillar"><strong>trust</strong> — Verified sources, signing keys, provenance chains.</div>
+  <div class="pillar"><strong>dust</strong> — Cleanup rules, stale keys, migration paths.</div>
+  <div class="pillar"><strong>intend</strong> — Intent declarations catching semantically wrong configs.</div>
+</div>
+
+<h2>Quick Start</h2>
+<pre><code>k9iser init           # creates k9iser.toml manifest
+k9iser generate       # analyse configs, infer constraints, emit K9 contracts
+k9iser validate       # check configs against their contracts</code></pre>
+
+<h2>Use Cases</h2>
+<ul>
+  <li>CI/CD config validation — gate merges on K9 contract compliance</li>
+  <li>Infrastructure-as-code compliance — validate Terraform / Ansible / Nix configs</li>
+  <li>Dependency manifest auditing — validate Cargo.toml / package.json against constraints</li>
+  <li>Deployment config gates — attest configs before deploy pipelines proceed</li>
+  <li>Config drift detection — compare live configs against K9 contracts</li>
+</ul>
+
+<div class="links">
+  <a href="https://github.com/hyperpolymath/k9iser">GitHub</a>
+  <a href="https://crates.io/crates/k9iser">crates.io</a>
+  <a href="https://github.com/hyperpolymath/contractile">contractile</a>
+  <a href="https://github.com/hyperpolymath/iseriser">-iser family</a>
+</div>
+
+<footer>
+  Part of the <a href="https://hyperpolymath.github.io/iseriser/">-iser acceleration family</a>.
+  Licensed under <a href="https://github.com/hyperpolymath/palimpsest-license">PMPL-2.0-or-later</a>.
+</footer>
+</div>
+</body>
+</html>
