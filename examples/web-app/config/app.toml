@@ -1,0 +1,33 @@
+# Web application configuration
+# This file is wrapped into a K9 contract by k9iser
+
+[server]
+host = "0.0.0.0"
+port = 8080
+workers = 4
+max-connections = 1024
+read-timeout = 30
+write-timeout = 30
+
+[database]
+url = "postgres://db-host:5432/webapp"
+pool-size = 20
+idle-timeout = 300
+max-lifetime = 3600
+
+[logging]
+level = "info"
+format = "json"
+output = "stdout"
+
+[security]
+cors-origins = ["https://app.example.com"]
+rate-limit = 100
+session-timeout = 3600
+csrf-protection = true
+
+[cache]
+backend = "redis"
+url = "redis://cache-host:6379/0"
+ttl = 300
+max-memory = "256mb"

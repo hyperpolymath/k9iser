@@ -1,0 +1,30 @@
+# k9iser manifest — web application config example
+# SPDX-License-Identifier: PMPL-1.0-or-later
+
+[project]
+name = "web-app-config"
+safety-tier = "yard"             # yard = medium risk (staging/internal)
+
+[[configs]]
+name = "app-config"
+source = "config/app.toml"
+format = "toml"
+# Must rules — required constraints:
+must = [
+    "server.port > 0",
+    "server.port < 65536",
+    "server.host != ''",
+    "database.pool-size > 0",
+    "database.pool-size <= 100",
+]
+# Trust sources — who verified this config:
+trust = ["signed-by: ci-pipeline", "reviewed-by: platform-team"]
+# Dust rules — cleanup actions:
+dust = ["remove: deprecated-keys", "remove: legacy-flags"]
+# Intend declarations — purpose:
+intend = ["production-ready", "security-reviewed"]
+
+[validation]
+strict = true
+auto-fix = false
+report-format = "text"
