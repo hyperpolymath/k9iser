@@ -1,32 +1,75 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
+// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 = k9iser Roadmap
 :toc:
 :icons: font
 
 == Phase 0: Scaffold (COMPLETE)
-* [x] RSR template with full CI/CD
-* [x] CLI with subcommands
-* [x] Manifest parser
+
+* [x] RSR template with full CI/CD (17 workflows)
+* [x] Rust CLI with subcommands (init, validate, generate, build, run, info)
+* [x] k9iser.toml manifest parser
 * [x] Codegen stubs
-* [x] ABI module stubs
+* [x] Idris2 ABI module stubs (Types, Layout, Foreign)
+* [x] Zig FFI stubs (build, main, integration tests)
 * [x] README with architecture
 
-== Phase 1: Core Implementation
-* [ ] Implement target-language-specific code generation
-* [ ] Write Idris2 ABI proofs for core invariants
-* [ ] Build Zig FFI bridge
-* [ ] First working end-to-end example
-* [ ] Integration tests
+== Phase 1: Config Parser (Multi-Format)
 
-== Phase 2: Polish
-* [ ] Error messages and diagnostics
-* [ ] Shell completions (bash, zsh, fish)
-* [ ] CI/CD for the generated artifacts
-* [ ] Performance benchmarks
-* [ ] Additional examples
+* [ ] TOML config parser and structural analysis
+* [ ] YAML config parser and structural analysis
+* [ ] JSON config parser and structural analysis
+* [ ] Nickel (.ncl) config parser
+* [ ] Unified config AST — normalised representation across formats
+* [ ] Value range extraction (numeric bounds, string patterns, enums)
+* [ ] Structural relationship detection (references between fields)
 
-== Phase 3: Ecosystem
-* [ ] PanLL panel integration
-* [ ] BoJ-server cartridge
-* [ ] VeriSimDB backing store for results
+== Phase 2: Constraint Inference Engine
+
+* [ ] Must-rule inference — required fields, type invariants, value ranges
+* [ ] Trust-source inference — detect signing metadata, provenance fields
+* [ ] Dust-rule inference — identify deprecated fields, stale patterns
+* [ ] Intent-declaration inference — semantic purpose from field naming conventions
+* [ ] Confidence scoring — each inferred constraint gets a confidence level
+* [ ] Human review mode — present inferred constraints for approval before codegen
+
+== Phase 3: K9 Contract Generation
+
+* [ ] `.k9.ncl` contract emitter (Nickel format)
+* [ ] Must-rule codegen (hard constraints)
+* [ ] Trust-source codegen (provenance chains)
+* [ ] Dust-rule codegen (cleanup migrations)
+* [ ] Intent-declaration codegen (semantic annotations)
+* [ ] Safety tier assignment — Kennel / Yard / Hunt per contract
+* [ ] Contract versioning — semantic version tracking of contract evolution
+* [ ] Contract diff — show what changed between contract versions
+
+== Phase 4: Validation Engine
+
+* [ ] Constraint evaluator — check config values against must-rules
+* [ ] Trust verifier — validate provenance and signing chains
+* [ ] Dust detector — flag stale fields and suggest migrations
+* [ ] Intent checker — semantic validation against intent declarations
+* [ ] Evidence collector — structured pass/fail evidence per constraint
+* [ ] Attestation signer — cryptographic signature over validation results
+* [ ] Report generator — human-readable validation reports
+
+== Phase 5: Idris2 Proofs of Constraint Soundness
+
+* [ ] K9Contract, Constraint, MustRule types in Idris2 ABI
+* [ ] Proof that must-rules are complete (no config field unconstrained)
+* [ ] Proof that trust chains are acyclic
+* [ ] Proof that dust migrations are confluent (order-independent)
+* [ ] Proof that validation is decidable (terminates for all inputs)
+* [ ] Zig FFI bridge for validation engine hot path
+* [ ] Generated C headers for Idris2-verified contract types
+
+== Phase 6: Ecosystem Integration
+
+* [ ] BoJ-server cartridge — expose k9iser as an MCP tool
+* [ ] CI/CD integration — GitHub Actions action for K9 validation gates
+* [ ] PanLL panel — K9 contract inspection and editing panel
+* [ ] VeriSimDB backing store — persist validation results and attestations
+* [ ] contractile CLI integration — `k9 validate` consumes k9iser contracts
 * [ ] Publish to crates.io
+* [ ] Example library — real-world configs with K9 contracts

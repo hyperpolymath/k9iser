@@ -5,31 +5,35 @@
 (state
   (metadata
     (version "0.1.0")
-    (last-updated "2026-03-20")
+    (last-updated "2026-03-21")
     (author "Jonathan D.A. Jewell"))
 
   (project-context
     (name "k9iser")
-    (description "Wrap configs into self-validating K9 contracts")
+    (description "Analyse config files, infer constraints, generate K9 contracts, validate, and attest compliance")
     (status "scaffold")
     (priority "—")
     (ecosystem "-iser family (https://github.com/hyperpolymath/iseriser)"))
 
   (current-position
     (phase "initial-scaffold")
-    (completion-percentage 5)
-    (milestone "Architecture defined, CLI scaffolded, RSR template complete"))
+    (completion-percentage 8)
+    (milestone "Architecture defined, CLI scaffolded, Idris2 ABI bespoke types written, Zig FFI bespoke stubs written, documentation complete"))
 
   (route-to-mvp
-    (step 1 "Replace codegen stubs with target-language-specific generation")
-    (step 2 "Implement Idris2 ABI proofs for core invariants")
-    (step 3 "Build Zig FFI bridge")
-    (step 4 "Integration tests with real-world examples")
-    (step 5 "Documentation and examples"))
+    (step 1 "Implement multi-format config parser (TOML, YAML, JSON, Nickel) in bridges/")
+    (step 2 "Build constraint inference engine in core/ — must, trust, dust, intend")
+    (step 3 "Implement K9 contract codegen — emit .k9.ncl files from inferred constraints")
+    (step 4 "Build validation engine — check configs against K9 contracts")
+    (step 5 "Implement cryptographic attestation for validation results")
+    (step 6 "Write Idris2 ABI proofs for constraint completeness and soundness")
+    (step 7 "Build Zig FFI bridge for validation engine hot path")
+    (step 8 "Integration tests with real-world config examples"))
 
   (blockers-and-issues
     (none "Project is in scaffold phase — no blockers yet"))
 
   (critical-next-actions
-    (action "Implement codegen for primary use case")
-    (action "Write first working example end-to-end")))
+    (action "Implement TOML config parser and structural analysis in bridges/")
+    (action "Define the unified config AST that all format parsers produce")
+    (action "Build first must-rule inference from observed config patterns")))

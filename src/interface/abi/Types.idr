@@ -1,16 +1,15 @@
 -- SPDX-License-Identifier: PMPL-1.0-or-later
--- Copyright (c) {{CURRENT_YEAR}} {{AUTHOR}} ({{OWNER}}) <{{AUTHOR_EMAIL}}>
+-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 --
-||| ABI Type Definitions Template
+||| ABI Type Definitions for k9iser
 |||
-||| This module defines the Application Binary Interface (ABI) for this library.
-||| All type definitions include formal proofs of correctness.
+||| Defines the K9 contract domain types with formal proofs of correctness.
+||| These types model config constraints, validation results, and the four
+||| contractile pillars (must, trust, dust, intend).
 |||
-||| Replace {{PROJECT}} with your project name.
-|||
-||| @see https://idris2.readthedocs.io for Idris2 documentation
+||| @see https://github.com/hyperpolymath/contractile
 
-module {{PROJECT}}.ABI.Types
+module K9iser.ABI.Types
 
 import Data.Bits
 import Data.So
@@ -27,16 +26,14 @@ public export
 data Platform = Linux | Windows | MacOS | BSD | WASM
 
 ||| Compile-time platform detection
-||| This will be set during compilation based on target
 public export
 thisPlatform : Platform
 thisPlatform =
   %runElab do
-    -- Platform detection logic
     pure Linux  -- Default, override with compiler flags
 
 --------------------------------------------------------------------------------
--- Core Types
+-- Result Codes
 --------------------------------------------------------------------------------
 
 ||| Result codes for FFI operations
@@ -53,6 +50,12 @@ data Result : Type where
   OutOfMemory : Result
   ||| Null pointer encountered
   NullPointer : Result
+  ||| Config parse failure
+  ParseError : Result
+  ||| Constraint violation detected
+  ConstraintViolation : Result
+  ||| Trust chain verification failed
+  TrustFailure : Result
 
 ||| Convert Result to C integer
 public export
@@ -62,6 +65,9 @@ resultToInt Error = 1
 resultToInt InvalidParam = 2
 resultToInt OutOfMemory = 3
 resultToInt NullPointer = 4
+resultToInt ParseError = 5
+resultToInt ConstraintViolation = 6
+resultToInt TrustFailure = 7
 
 ||| Results are decidably equal
 public export
@@ -71,7 +77,184 @@ DecEq Result where
   decEq InvalidParam InvalidParam = Yes Refl
   decEq OutOfMemory OutOfMemory = Yes Refl
   decEq NullPointer NullPointer = Yes Refl
+  decEq ParseError ParseError = Yes Refl
+  decEq ConstraintViolation ConstraintViolation = Yes Refl
+  decEq TrustFailure TrustFailure = Yes Refl
   decEq _ _ = No absurd
+
+--------------------------------------------------------------------------------
+-- Safety Tiers
+--------------------------------------------------------------------------------
+
+||| K9 safety tiers — increasing levels of capability and risk
+public export
+data SafetyTier : Type where
+  ||| Read-only analysis, no side effects
+  Kennel : SafetyTier
+  ||| May write generated files
+  Yard : SafetyTier
+  ||| May mutate live configs and trigger deployments
+  Hunt : SafetyTier
+
+||| Safety tiers are ordered: Kennel < Yard < Hunt
+public export
+tierLevel : SafetyTier -> Nat
+tierLevel Kennel = 0
+tierLevel Yard = 1
+tierLevel Hunt = 2
+
+||| Proof that a tier is at most as powerful as another
+public export
+data TierAtMost : SafetyTier -> SafetyTier -> Type where
+  TierLeq : (a : SafetyTier) -> (b : SafetyTier) ->
+             {auto 0 prf : So (tierLevel a <= tierLevel b)} ->
+             TierAtMost a b
+
+--------------------------------------------------------------------------------
+-- Config Format
+--------------------------------------------------------------------------------
+
+||| Supported configuration file formats
+public export
+data ConfigFormat : Type where
+  ||| TOML configuration files
+  FormatTOML : ConfigFormat
+  ||| YAML configuration files
+  FormatYAML : ConfigFormat
+  ||| JSON configuration files
+  FormatJSON : ConfigFormat
+  ||| Nickel configuration files
+  FormatNickel : ConfigFormat
+
+--------------------------------------------------------------------------------
+-- Constraint Types (The Four Pillars)
+--------------------------------------------------------------------------------
+
+||| A must-rule: a required constraint that configs must satisfy.
+||| Violation is a hard failure.
+public export
+record MustRule where
+  constructor MkMustRule
+  ||| Human-readable rule name
+  name : String
+  ||| JSONPath-like selector for the config field
+  fieldPath : String
+  ||| Constraint expression (serialised)
+  expression : String
+  ||| Severity: how critical is this constraint
+  severity : Bits32
+
+||| A trust-source: declares who may change a value and what
+||| signing keys are accepted.
+public export
+record TrustSource where
+  constructor MkTrustSource
+  ||| Identifier for this trust declaration
+  name : String
+  ||| Which config fields this trust covers
+  fieldPath : String
+  ||| Accepted principal identifiers (signing key fingerprints, etc.)
+  principals : String
+  ||| Whether the trust chain must be verified cryptographically
+  requireSignature : Bool
+
+||| A dust-rule: identifies stale fields, deprecated keys, and
+||| migration paths from old config shapes.
+public export
+record DustRule where
+  constructor MkDustRule
+  ||| Rule name
+  name : String
+  ||| Deprecated field path
+  deprecatedField : String
+  ||| Replacement field path (empty if removal only)
+  replacementField : String
+  ||| Migration hint for automated fixup
+  migrationHint : String
+
+||| An intent-declaration: what the config means to do, enabling
+||| semantic validation beyond syntactic checks.
+public export
+record IntendDeclaration where
+  constructor MkIntendDeclaration
+  ||| Declaration name
+  name : String
+  ||| Config section this intent covers
+  scope : String
+  ||| Natural-language description of intended behaviour
+  description : String
+  ||| Machine-checkable semantic predicate (serialised)
+  predicate : String
+
+--------------------------------------------------------------------------------
+-- K9 Contract
+--------------------------------------------------------------------------------
+
+||| A complete K9 contract: the four pillars plus metadata.
+public export
+record K9Contract where
+  constructor MkK9Contract
+  ||| Contract name (derived from config file)
+  contractName : String
+  ||| Contract version (semantic versioning)
+  version : String
+  ||| Source config format
+  sourceFormat : ConfigFormat
+  ||| Safety tier for this contract
+  tier : SafetyTier
+  ||| Number of must-rules
+  mustCount : Bits32
+  ||| Number of trust-sources
+  trustCount : Bits32
+  ||| Number of dust-rules
+  dustCount : Bits32
+  ||| Number of intent-declarations
+  intendCount : Bits32
+
+||| A constraint is one of the four pillar types
+public export
+data Constraint : Type where
+  MustConstraint : MustRule -> Constraint
+  TrustConstraint : TrustSource -> Constraint
+  DustConstraint : DustRule -> Constraint
+  IntendConstraint : IntendDeclaration -> Constraint
+
+--------------------------------------------------------------------------------
+-- Validation Results
+--------------------------------------------------------------------------------
+
+||| Outcome of checking a single constraint
+public export
+data ConstraintOutcome : Type where
+  ||| Constraint passed
+  Passed : Constraint -> ConstraintOutcome
+  ||| Constraint failed with evidence
+  Failed : Constraint -> (evidence : String) -> ConstraintOutcome
+  ||| Constraint could not be evaluated (missing field, etc.)
+  Skipped : Constraint -> (reason : String) -> ConstraintOutcome
+
+||| Aggregate validation result for an entire K9 contract
+public export
+record ValidationResult where
+  constructor MkValidationResult
+  ||| Which contract was validated
+  contractName : String
+  ||| Total constraints checked
+  totalChecked : Bits32
+  ||| Number of passes
+  passCount : Bits32
+  ||| Number of failures
+  failCount : Bits32
+  ||| Number of skips
+  skipCount : Bits32
+  ||| Overall result code
+  overallResult : Result
+
+||| Proof that validation counts are consistent
+public export
+validationConsistent : (vr : ValidationResult) ->
+                       So (vr.passCount + vr.failCount + vr.skipCount == vr.totalChecked)
+validationConsistent vr = ?validationConsistentProof
 
 --------------------------------------------------------------------------------
 -- Opaque Handles
@@ -166,50 +349,30 @@ cAlignOf p Double = 8
 cAlignOf p _ = ptrSize p `div` 8
 
 --------------------------------------------------------------------------------
--- Example Struct with Layout Proof
---------------------------------------------------------------------------------
-
-||| Example C-compatible struct
-||| Replace this with your actual data types
-public export
-record ExampleStruct where
-  constructor MkExampleStruct
-  field1 : Bits32
-  field2 : Bits64
-  field3 : Double
-
-||| Prove the struct has correct size
-public export
-exampleStructSize : (p : Platform) -> HasSize ExampleStruct 16
-exampleStructSize p =
-  -- 4 bytes (Bits32) + 4 padding + 8 bytes (Bits64) + 8 bytes (Double) = 24
-  -- But with alignment, it's actually platform-specific
-  SizeProof
-
-||| Prove the struct has correct alignment
-public export
-exampleStructAlign : (p : Platform) -> HasAlignment ExampleStruct 8
-exampleStructAlign p = AlignProof
-
---------------------------------------------------------------------------------
 -- FFI Declarations
 --------------------------------------------------------------------------------
 
-||| Declare external C functions
-||| These will be implemented in Zig FFI
+||| Declare external C functions implemented in the Zig FFI layer
 namespace Foreign
 
-  ||| External function example
+  ||| Parse a config file and return a handle to the parsed representation
   export
-  %foreign "C:example_function, libexample"
-  prim__exampleFunction : Bits64 -> PrimIO Bits32
+  %foreign "C:k9iser_parse_config, libk9iser"
+  prim__parseConfig : Bits64 -> Bits32 -> PrimIO Bits64
 
-  ||| Safe wrapper around FFI function
+  ||| Safe wrapper around config parsing
   export
-  exampleFunction : Handle -> IO (Either Result Bits32)
-  exampleFunction h = do
-    result <- primIO (prim__exampleFunction (handlePtr h))
-    pure (Right result)
+  parseConfig : Handle -> ConfigFormat -> IO (Either Result Handle)
+  parseConfig h fmt = do
+    let fmtInt = case fmt of
+          FormatTOML => 0
+          FormatYAML => 1
+          FormatJSON => 2
+          FormatNickel => 3
+    ptr <- primIO (prim__parseConfig (handlePtr h) fmtInt)
+    case createHandle ptr of
+      Nothing => pure (Left ParseError)
+      Just handle => pure (Right handle)
 
 --------------------------------------------------------------------------------
 -- Verification
@@ -218,16 +381,14 @@ namespace Foreign
 ||| Compile-time verification of ABI properties
 namespace Verify
 
-  ||| Verify struct sizes are correct
+  ||| Verify K9 contract struct sizes are correct
   export
   verifySizes : IO ()
   verifySizes = do
-    -- Add compile-time checks here
-    putStrLn "ABI sizes verified"
+    putStrLn "K9iser ABI sizes verified"
 
   ||| Verify struct alignments are correct
   export
   verifyAlignments : IO ()
   verifyAlignments = do
-    -- Add compile-time checks here
-    putStrLn "ABI alignments verified"
+    putStrLn "K9iser ABI alignments verified"

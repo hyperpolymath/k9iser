@@ -6,15 +6,19 @@
   (version "0.1.0")
   (name "k9iser")
   (type "tool")
-  (purpose "Wrap configs into self-validating K9 contracts")
+  (purpose "Analyse config files, infer constraints, generate K9 contracts, validate and attest compliance")
 
   (position-in-ecosystem
     (family "-iser acceleration frameworks")
     (meta-framework "iseriser")
     (relationship "sibling")
+    (role "K9 contract toolchain — the canonical tool for generating and validating K9 contracts")
     (top-3 ("typedqliser" "chapeliser" "verisimiser")))
 
   (related-projects
+    (project "contractile"
+      (relationship "upstream-consumer")
+      (description "CLI contract system — k9iser generates contracts that contractile validators consume"))
     (project "iseriser"
       (relationship "meta-framework")
       (description "Generates new -iser project scaffolding"))
@@ -27,12 +31,12 @@
     (project "verisimiser"
       (relationship "sibling-priority-3")
       (description "VeriSimDB octad database augmentation"))
-    (project "squeakwell"
-      (relationship "sibling")
-      (description "Database recovery via constraint propagation"))
     (project "proven"
       (relationship "dependency")
       (description "Shared Idris2 verified library"))
     (project "typell"
       (relationship "dependency")
-      (description "Type theory engine"))))
+      (description "Type theory engine"))
+    (project "boj-server"
+      (relationship "integration-target")
+      (description "MCP server — k9iser will ship as a BoJ cartridge"))))

@@ -1,45 +1,147 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
 // Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
-= K9iser
+= k9iser
 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 :toc: left
 :icons: font
 
 == What Is This?
 
-K9iser wraps existing configuration files and deployment scripts into
-**self-validating K9 contracts** — files that validate themselves before executing.
+**k9iser** analyses configuration files — TOML, YAML, JSON, Nickel — infers the
+implicit constraints they embody, generates formal
+https://github.com/hyperpolymath/contractile[K9 contracts] from those
+constraints, validates configs against the contracts, and attests compliance
+with cryptographic signatures.
 
-K9 (Self-Validating Components) enforces a must-just-nickel contract triad
-with tiered safety levels (Kennel/Yard/Hunt). K9iser applies this to existing
-infrastructure.
+Think "JSON Schema on steroids with cryptographic attestation." Where a schema
+says _"this field is a string,"_ a K9 contract says _"this field is a
+non-empty DNS hostname that resolves, is not on a blocklist, and was last
+changed by a trusted principal — here is the proof."_
+
+Part of the https://github.com/hyperpolymath/iseriser[-iser family].
 
 == How It Works
 
-Point K9iser at your configs in `k9iser.toml`. K9iser:
+Point k9iser at your configs:
 
-1. Analyses existing configs (YAML, TOML, JSON, HCL)
-2. Generates K9 contracts with embedded validation rules
-3. Adds tiered safety: Kennel (safe), Yard (moderate), Hunt (powerful)
-4. Provides cryptographic signing and verification
-5. Self-validation runs before any deployment
+[source,bash]
+----
+k9iser init           # creates k9iser.toml manifest
+k9iser generate       # analyse configs → infer constraints → emit K9 contracts
+k9iser validate       # check configs against their contracts
+----
 
-== Key Value
+The pipeline:
 
-* **Configs that validate themselves** — no external validator needed
-* **Tiered safety levels** — sandbox dangerous operations automatically
-* **Signed contracts** — cryptographic proof of authorised changes
-* **Deploy with confidence** — invalid configs caught before execution
+1. **Config analysis** — parse TOML / YAML / JSON / Nickel, extract structure
+   and value ranges.
+2. **Constraint inference** — derive must-rules, trust sources, dust (cleanup)
+   rules, and intent declarations from observed config patterns.
+3. **K9 contract generation** — emit machine-readable `.k9.ncl` contracts
+   encoding the inferred constraints.
+4. **Validation engine** — check a config against its K9 contract, collecting
+   pass/fail evidence for every constraint.
+5. **Attestation** — sign the validation result so downstream consumers can
+   verify compliance without re-running the checks.
+
+== K9 Contract Anatomy
+
+A K9 contract is built from four pillars, matching the
+https://github.com/hyperpolymath/contractile[contractile CLI] system:
+
+[cols="1,3"]
+|===
+| **must** | Required constraints — fields that must exist, value ranges, type
+             invariants. Violation = hard failure.
+| **trust** | Verified sources — which principals may change a value, which
+              signing keys are accepted, provenance chains.
+| **dust**  | Cleanup rules — stale keys to remove, deprecated fields, migration
+              paths from old config shapes.
+| **intend** | Intent declarations — what the config _means_ to do, so
+               validators can catch configs that are syntactically valid but
+               semantically wrong.
+|===
+
+Contracts are tiered by safety level:
+
+* **Kennel** — safe, read-only analysis, no side effects.
+* **Yard** — moderate, may write generated files.
+* **Hunt** — powerful, may mutate live configs and trigger deployments.
+
+== Use Cases
+
+* **CI/CD config validation** — gate merges on K9 contract compliance.
+* **Infrastructure-as-code compliance** — ensure Terraform / Ansible / Nix
+  configs satisfy organisational policy before apply.
+* **Dependency manifest auditing** — validate Cargo.toml / package.json /
+  pyproject.toml against known-good constraints.
+* **Deployment config gates** — attest that a deployment config satisfies all
+  must-rules before the deploy pipeline proceeds.
+* **Config drift detection** — compare live configs against K9 contracts to
+  surface unauthorised changes.
 
 == Architecture
 
 Follows the hyperpolymath -iser pattern:
-manifest -> Idris2 ABI proof -> Zig FFI bridge -> target language codegen.
-Part of the https://github.com/hyperpolymath/iseriser[-iser family].
+
+----
+k9iser.toml manifest
+  → config analysis (multi-format parser)
+  → constraint inference engine
+  → Idris2 ABI (proves constraint completeness and soundness)
+  → K9 contract codegen (.k9.ncl)
+  → Zig FFI bridge (C-ABI validation engine)
+  → Rust CLI orchestration
+----
+
+[source]
+----
+src/
+├── main.rs              # CLI entry point (clap)
+├── lib.rs               # Library API
+├── manifest/            # k9iser.toml parser
+├── codegen/             # K9 contract code generation
+├── core/                # Constraint inference, validation engine
+├── contracts/           # K9 contract data model
+├── definitions/         # Built-in constraint definitions
+├── errors/              # Structured error types
+├── bridges/             # Format-specific parsers (TOML, YAML, JSON, Nickel)
+├── aspects/             # Cross-cutting concerns (logging, attestation)
+└── interface/
+    ├── abi/             # Idris2 ABI — proves constraint soundness
+    │   ├── Types.idr    # K9Contract, Constraint, MustRule, ValidationResult
+    │   ├── Layout.idr   # Contract struct layout proofs
+    │   └── Foreign.idr  # FFI declarations for validation engine
+    ├── ffi/             # Zig FFI — C-ABI validation bridge
+    │   ├── build.zig
+    │   ├── src/main.zig
+    │   └── test/integration_test.zig
+    └── generated/       # Auto-generated C headers from Idris2 ABI
+----
+
+== Integration with Contractile
+
+k9iser is both a _producer_ and _consumer_ of the contractile CLI toolchain:
+
+* **Producer** — generates `.k9.ncl` contracts from analysed configs.
+* **Consumer** — validates those contracts using the `k9` validator from
+  https://github.com/hyperpolymath/contractile[contractile].
+* **must** / **trust** / **dust** / **intend** validators can all be invoked
+  against k9iser-generated contracts.
 
 == Status
 
-**Pre-alpha.** Architecture defined, scaffolding in place, codegen pending.
+**Pre-alpha.** Scaffold complete. Config parser, constraint inference, and K9
+contract codegen are in progress. The Idris2 ABI and Zig FFI layers carry
+template placeholders pending domain-specific types.
+
+== Build
+
+[source,bash]
+----
+cargo build --release
+cargo test
+----
 
 == License
 
