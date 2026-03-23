@@ -324,7 +324,10 @@ mod tests {
 
     #[test]
     fn test_safety_tier_from_str() {
-        assert_eq!(SafetyTier::from_str_loose("kennel"), Some(SafetyTier::Kennel));
+        assert_eq!(
+            SafetyTier::from_str_loose("kennel"),
+            Some(SafetyTier::Kennel)
+        );
         assert_eq!(SafetyTier::from_str_loose("YARD"), Some(SafetyTier::Yard));
         assert_eq!(SafetyTier::from_str_loose("Hunt"), Some(SafetyTier::Hunt));
         assert_eq!(SafetyTier::from_str_loose("invalid"), None);

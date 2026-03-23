@@ -4,9 +4,9 @@
 // Integration tests for k9iser — exercises manifest loading, validation,
 // config parsing, contract generation, and rule checking end-to-end.
 
-use k9iser::abi::{parse_must_rule, ConfigFormat, SafetyTier};
+use k9iser::abi::{ConfigFormat, SafetyTier, parse_must_rule};
 use k9iser::codegen::contract::build_k9_contract;
-use k9iser::codegen::parser::{parse_config_string, ParsedEntry, ValueType};
+use k9iser::codegen::parser::{ParsedEntry, ValueType, parse_config_string};
 use k9iser::codegen::validator::validate_config;
 use k9iser::manifest;
 use tempfile::TempDir;
@@ -24,10 +24,22 @@ fn test_init_creates_manifest() {
     assert!(manifest_path.exists(), "k9iser.toml should be created");
 
     let content = std::fs::read_to_string(&manifest_path).unwrap();
-    assert!(content.contains("[project]"), "Should have [project] section");
-    assert!(content.contains("safety-tier"), "Should have safety-tier field");
-    assert!(content.contains("[[configs]]"), "Should have [[configs]] section");
-    assert!(content.contains("[validation]"), "Should have [validation] section");
+    assert!(
+        content.contains("[project]"),
+        "Should have [project] section"
+    );
+    assert!(
+        content.contains("safety-tier"),
+        "Should have safety-tier field"
+    );
+    assert!(
+        content.contains("[[configs]]"),
+        "Should have [[configs]] section"
+    );
+    assert!(
+        content.contains("[validation]"),
+        "Should have [validation] section"
+    );
     assert!(content.contains("must"), "Should have must pillar");
     assert!(content.contains("trust"), "Should have trust pillar");
     assert!(content.contains("dust"), "Should have dust pillar");
@@ -206,7 +218,11 @@ fn test_must_rule_parsing() {
         assert!(rule.is_some(), "Should parse: {}", input);
         let rule = rule.unwrap();
         assert_eq!(rule.key, expected_key, "Key mismatch for: {}", input);
-        assert_eq!(rule.operator, expected_op, "Operator mismatch for: {}", input);
+        assert_eq!(
+            rule.operator, expected_op,
+            "Operator mismatch for: {}",
+            input
+        );
         assert_eq!(rule.value, expected_val, "Value mismatch for: {}", input);
     }
 }
@@ -249,7 +265,10 @@ pool-size = 10
     assert_eq!(weight.value_type, ValueType::Float);
 
     // Check database.pool-size
-    let pool = entries.iter().find(|e| e.key == "database.pool-size").unwrap();
+    let pool = entries
+        .iter()
+        .find(|e| e.key == "database.pool-size")
+        .unwrap();
     assert_eq!(pool.value, "10");
     assert_eq!(pool.value_type, ValueType::Int);
 }

@@ -6,8 +6,8 @@
 // K9Contract structs for use by the validator.
 
 use crate::abi::{
-    parse_dust_rule, parse_must_rule, parse_trust_source, ConfigFormat, IntendDeclaration,
-    K9Contract, MustRule, SafetyTier,
+    ConfigFormat, IntendDeclaration, K9Contract, MustRule, SafetyTier, parse_dust_rule,
+    parse_must_rule, parse_trust_source,
 };
 use crate::codegen::parser::{ParsedEntry, ValueType};
 
@@ -52,7 +52,10 @@ pub fn generate_k9_contract(
         output.push_str("# (no must rules defined)\n");
     } else {
         // Group must rules by key
-        let parsed_rules: Vec<MustRule> = must_rules.iter().filter_map(|r| parse_must_rule(r)).collect();
+        let parsed_rules: Vec<MustRule> = must_rules
+            .iter()
+            .filter_map(|r| parse_must_rule(r))
+            .collect();
         let mut keys_seen: Vec<String> = Vec::new();
 
         for rule in &parsed_rules {
@@ -62,8 +65,7 @@ pub fn generate_k9_contract(
         }
 
         for key in &keys_seen {
-            let key_rules: Vec<&MustRule> =
-                parsed_rules.iter().filter(|r| &r.key == key).collect();
+            let key_rules: Vec<&MustRule> = parsed_rules.iter().filter(|r| &r.key == key).collect();
 
             // Infer type from parsed entries if available
             let type_str = infer_type_for_key(key, parsed_entries);
@@ -102,7 +104,10 @@ pub fn generate_k9_contract(
         output.push_str("# (no dust rules defined)\n");
     } else {
         // Group dust rules by action
-        let parsed: Vec<_> = dust_rules.iter().filter_map(|d| parse_dust_rule(d)).collect();
+        let parsed: Vec<_> = dust_rules
+            .iter()
+            .filter_map(|d| parse_dust_rule(d))
+            .collect();
         let mut actions_seen: Vec<String> = Vec::new();
         for d in &parsed {
             if !actions_seen.contains(&d.action) {
@@ -178,9 +183,9 @@ pub fn build_k9_contract(
 /// Falls back to "string" if the key is not found in parsed entries.
 fn infer_type_for_key(key: &str, parsed_entries: &[ParsedEntry]) -> &'static str {
     // Try exact match first, then try matching the last segment
-    let entry = parsed_entries.iter().find(|e| {
-        e.key == key || e.key.ends_with(&format!(".{}", key))
-    });
+    let entry = parsed_entries
+        .iter()
+        .find(|e| e.key == key || e.key.ends_with(&format!(".{}", key)));
 
     match entry {
         Some(e) => match e.value_type {
@@ -204,7 +209,11 @@ mod tests {
         let content = generate_k9_contract(
             "app-config",
             SafetyTier::Kennel,
-            &["port > 0".into(), "port < 65536".into(), "host != ''".into()],
+            &[
+                "port > 0".into(),
+                "port < 65536".into(),
+                "host != ''".into(),
+            ],
             &["signed-by: ci-pipeline".into()],
             &["remove: deprecated-keys".into()],
             &["production-ready".into()],

@@ -45,8 +45,8 @@ pub enum ValueType {
 ///
 /// The file format is determined by the `format` parameter, not by file extension.
 pub fn parse_config_file(path: &str, format: ConfigFormat) -> Result<Vec<ParsedEntry>> {
-    let content =
-        std::fs::read_to_string(path).with_context(|| format!("Failed to read config: {}", path))?;
+    let content = std::fs::read_to_string(path)
+        .with_context(|| format!("Failed to read config: {}", path))?;
     parse_config_string(&content, format)
 }
 
@@ -66,8 +66,9 @@ pub fn parse_config_string(content: &str, format: ConfigFormat) -> Result<Vec<Pa
 
 /// Parse TOML content into flat key-value entries.
 fn parse_toml(content: &str) -> Result<Vec<ParsedEntry>> {
-    let table: toml::Table =
-        content.parse().with_context(|| "Failed to parse TOML content")?;
+    let table: toml::Table = content
+        .parse()
+        .with_context(|| "Failed to parse TOML content")?;
     let mut entries = Vec::new();
     flatten_toml_value(&toml::Value::Table(table), "", &mut entries);
     Ok(entries)
@@ -178,7 +179,9 @@ fn parse_json_value(input: &str) -> Result<JsonValue> {
         _ => {
             // Try to parse as number
             let end = input
-                .find(|c: char| !c.is_ascii_digit() && c != '.' && c != '-' && c != '+' && c != 'e' && c != 'E')
+                .find(|c: char| {
+                    !c.is_ascii_digit() && c != '.' && c != '-' && c != '+' && c != 'e' && c != 'E'
+                })
                 .unwrap_or(input.len());
             let num_str = &input[..end];
             let num: f64 = num_str
@@ -262,13 +265,34 @@ fn parse_json_string(input: &str) -> Result<(String, &str)> {
     while i < bytes.len() {
         if bytes[i] == b'\\' && i + 1 < bytes.len() {
             match bytes[i + 1] {
-                b'"' => { result.push('"'); i += 2; }
-                b'\\' => { result.push('\\'); i += 2; }
-                b'n' => { result.push('\n'); i += 2; }
-                b't' => { result.push('\t'); i += 2; }
-                b'r' => { result.push('\r'); i += 2; }
-                b'/' => { result.push('/'); i += 2; }
-                _ => { result.push(bytes[i + 1] as char); i += 2; }
+                b'"' => {
+                    result.push('"');
+                    i += 2;
+                }
+                b'\\' => {
+                    result.push('\\');
+                    i += 2;
+                }
+                b'n' => {
+                    result.push('\n');
+                    i += 2;
+                }
+                b't' => {
+                    result.push('\t');
+                    i += 2;
+                }
+                b'r' => {
+                    result.push('\r');
+                    i += 2;
+                }
+                b'/' => {
+                    result.push('/');
+                    i += 2;
+                }
+                _ => {
+                    result.push(bytes[i + 1] as char);
+                    i += 2;
+                }
             }
         } else if bytes[i] == b'"' {
             return Ok((result, &input[i + 1..]));
@@ -307,7 +331,9 @@ fn parse_json_value_with_rest(input: &str) -> Result<(JsonValue, &str)> {
         b'n' if input.starts_with("null") => Ok((JsonValue::Null, &input[4..])),
         _ => {
             let end = input
-                .find(|c: char| !c.is_ascii_digit() && c != '.' && c != '-' && c != '+' && c != 'e' && c != 'E')
+                .find(|c: char| {
+                    !c.is_ascii_digit() && c != '.' && c != '-' && c != '+' && c != 'e' && c != 'E'
+                })
                 .unwrap_or(input.len());
             let num_str = &input[..end];
             let num: f64 = num_str
@@ -496,12 +522,12 @@ fn classify_yaml_value(s: &str) -> (String, ValueType) {
     }
 
     // Integer
-    if let Ok(_) = s.parse::<i64>() {
+    if s.parse::<i64>().is_ok() {
         return (s.to_string(), ValueType::Int);
     }
 
     // Float
-    if let Ok(_) = s.parse::<f64>() {
+    if s.parse::<f64>().is_ok() {
         return (s.to_string(), ValueType::Float);
     }
 
@@ -576,12 +602,12 @@ fn classify_ini_value(s: &str) -> (String, ValueType) {
     }
 
     // Integer
-    if let Ok(_) = s.parse::<i64>() {
+    if s.parse::<i64>().is_ok() {
         return (s.to_string(), ValueType::Int);
     }
 
     // Float
-    if let Ok(_) = s.parse::<f64>() {
+    if s.parse::<f64>().is_ok() {
         return (s.to_string(), ValueType::Float);
     }
 
@@ -602,35 +628,63 @@ host = "localhost"
 debug = true
 "#;
         let entries = parse_toml(content).unwrap();
-        assert!(entries.iter().any(|e| e.key == "server.port" && e.value == "8080" && e.value_type == ValueType::Int));
-        assert!(entries.iter().any(|e| e.key == "server.host" && e.value == "localhost" && e.value_type == ValueType::String));
-        assert!(entries.iter().any(|e| e.key == "server.debug" && e.value == "true" && e.value_type == ValueType::Bool));
+        assert!(entries.iter().any(|e| e.key == "server.port"
+            && e.value == "8080"
+            && e.value_type == ValueType::Int));
+        assert!(entries.iter().any(|e| e.key == "server.host"
+            && e.value == "localhost"
+            && e.value_type == ValueType::String));
+        assert!(entries.iter().any(|e| e.key == "server.debug"
+            && e.value == "true"
+            && e.value_type == ValueType::Bool));
     }
 
     #[test]
     fn test_parse_json_simple() {
         let content = r#"{"port": 8080, "host": "localhost", "debug": true}"#;
         let entries = parse_json(content).unwrap();
-        assert!(entries.iter().any(|e| e.key == "port" && e.value == "8080" && e.value_type == ValueType::Int));
-        assert!(entries.iter().any(|e| e.key == "host" && e.value == "localhost" && e.value_type == ValueType::String));
-        assert!(entries.iter().any(|e| e.key == "debug" && e.value == "true" && e.value_type == ValueType::Bool));
+        assert!(
+            entries
+                .iter()
+                .any(|e| e.key == "port" && e.value == "8080" && e.value_type == ValueType::Int)
+        );
+        assert!(entries.iter().any(|e| e.key == "host"
+            && e.value == "localhost"
+            && e.value_type == ValueType::String));
+        assert!(
+            entries
+                .iter()
+                .any(|e| e.key == "debug" && e.value == "true" && e.value_type == ValueType::Bool)
+        );
     }
 
     #[test]
     fn test_parse_yaml_simple() {
         let content = "server:\n  port: 8080\n  host: localhost\n  debug: true\n";
         let entries = parse_yaml(content).unwrap();
-        assert!(entries.iter().any(|e| e.key == "server.port" && e.value == "8080" && e.value_type == ValueType::Int));
-        assert!(entries.iter().any(|e| e.key == "server.host" && e.value == "localhost" && e.value_type == ValueType::String));
-        assert!(entries.iter().any(|e| e.key == "server.debug" && e.value == "true" && e.value_type == ValueType::Bool));
+        assert!(entries.iter().any(|e| e.key == "server.port"
+            && e.value == "8080"
+            && e.value_type == ValueType::Int));
+        assert!(entries.iter().any(|e| e.key == "server.host"
+            && e.value == "localhost"
+            && e.value_type == ValueType::String));
+        assert!(entries.iter().any(|e| e.key == "server.debug"
+            && e.value == "true"
+            && e.value_type == ValueType::Bool));
     }
 
     #[test]
     fn test_parse_ini_simple() {
         let content = "[server]\nport = 8080\nhost = localhost\ndebug = true\n";
         let entries = parse_ini(content).unwrap();
-        assert!(entries.iter().any(|e| e.key == "server.port" && e.value == "8080" && e.value_type == ValueType::Int));
-        assert!(entries.iter().any(|e| e.key == "server.host" && e.value == "localhost" && e.value_type == ValueType::String));
-        assert!(entries.iter().any(|e| e.key == "server.debug" && e.value == "true" && e.value_type == ValueType::Bool));
+        assert!(entries.iter().any(|e| e.key == "server.port"
+            && e.value == "8080"
+            && e.value_type == ValueType::Int));
+        assert!(entries.iter().any(|e| e.key == "server.host"
+            && e.value == "localhost"
+            && e.value_type == ValueType::String));
+        assert!(entries.iter().any(|e| e.key == "server.debug"
+            && e.value == "true"
+            && e.value_type == ValueType::Bool));
     }
 }

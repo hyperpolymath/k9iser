@@ -21,9 +21,9 @@ pub fn validate_config(entries: &[ParsedEntry], contract: &K9Contract) -> Valida
     for rule in &contract.must_rules {
         // Find the matching config entry for this rule's key.
         // Try exact match first, then suffix match (e.g. "port" matches "server.port").
-        let entry = entries.iter().find(|e| {
-            e.key == rule.key || e.key.ends_with(&format!(".{}", rule.key))
-        });
+        let entry = entries
+            .iter()
+            .find(|e| e.key == rule.key || e.key.ends_with(&format!(".{}", rule.key)));
 
         match entry {
             None => {
@@ -196,7 +196,11 @@ mod tests {
             "config/test.toml",
             ConfigFormat::Toml,
             SafetyTier::Kennel,
-            &["port > 0".into(), "port < 65536".into(), "host != ''".into()],
+            &[
+                "port > 0".into(),
+                "port < 65536".into(),
+                "host != ''".into(),
+            ],
             &[],
             &[],
             &[],

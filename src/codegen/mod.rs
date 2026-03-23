@@ -17,7 +17,7 @@ use std::fs;
 use std::path::Path;
 
 use crate::abi::{ConfigFormat, SafetyTier};
-use crate::manifest::{effective_project_name, Manifest};
+use crate::manifest::{Manifest, effective_project_name};
 
 /// Generate all K9 contract files for every config entry in the manifest.
 ///
@@ -28,8 +28,8 @@ use crate::manifest::{effective_project_name, Manifest};
 /// Output files are written to `output_dir/<config-name>.k9`.
 pub fn generate_all(manifest: &Manifest, output_dir: &str) -> Result<()> {
     let project_name = effective_project_name(manifest);
-    let safety_tier = SafetyTier::from_str_loose(&manifest.project.safety_tier)
-        .unwrap_or(SafetyTier::Kennel);
+    let safety_tier =
+        SafetyTier::from_str_loose(&manifest.project.safety_tier).unwrap_or(SafetyTier::Kennel);
 
     fs::create_dir_all(output_dir)
         .with_context(|| format!("Failed to create output directory: {}", output_dir))?;
@@ -81,11 +81,7 @@ pub fn generate_all(manifest: &Manifest, output_dir: &str) -> Result<()> {
         fs::write(&output_path, &k9_content)
             .with_context(|| format!("Failed to write contract: {}", output_path.display()))?;
 
-        println!(
-            "  Generated {} ({})",
-            output_path.display(),
-            cfg.name
-        );
+        println!("  Generated {} ({})", output_path.display(), cfg.name);
     }
 
     println!(
@@ -104,8 +100,8 @@ pub fn build(manifest: &Manifest, _release: bool) -> Result<()> {
     let project_name = effective_project_name(manifest);
     println!("Building k9iser project: {}", project_name);
 
-    let safety_tier = SafetyTier::from_str_loose(&manifest.project.safety_tier)
-        .unwrap_or(SafetyTier::Kennel);
+    let safety_tier =
+        SafetyTier::from_str_loose(&manifest.project.safety_tier).unwrap_or(SafetyTier::Kennel);
 
     let manifest_dir = Path::new(".");
     let mut all_passed = true;
@@ -115,7 +111,10 @@ pub fn build(manifest: &Manifest, _release: bool) -> Result<()> {
         let source_path = manifest_dir.join(&cfg.source);
 
         if !source_path.exists() {
-            println!("  Skip '{}': source not found at '{}'", cfg.name, cfg.source);
+            println!(
+                "  Skip '{}': source not found at '{}'",
+                cfg.name, cfg.source
+            );
             continue;
         }
 
@@ -154,7 +153,10 @@ pub fn build(manifest: &Manifest, _release: bool) -> Result<()> {
 pub fn run(manifest: &Manifest, _args: &[String]) -> Result<()> {
     let project_name = effective_project_name(manifest);
     println!("Running k9iser project: {}", project_name);
-    println!("  All {} config(s) contract-wrapped.", manifest.configs.len());
+    println!(
+        "  All {} config(s) contract-wrapped.",
+        manifest.configs.len()
+    );
     println!("  Deploy using your preferred toolchain.");
     Ok(())
 }
