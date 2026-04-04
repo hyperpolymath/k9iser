@@ -96,7 +96,10 @@ fn main() -> Result<()> {
         Commands::Generate { manifest, output } => {
             let m = manifest::load_manifest(&manifest)?;
             manifest::validate(&m)?;
-            codegen::generate_all(&m, &output)?;
+            let manifest_dir = std::path::Path::new(&manifest)
+                .parent()
+                .unwrap_or(std::path::Path::new("."));
+            codegen::generate_all_from(&m, &output, manifest_dir)?;
         }
         Commands::Build { manifest, release } => {
             let m = manifest::load_manifest(&manifest)?;

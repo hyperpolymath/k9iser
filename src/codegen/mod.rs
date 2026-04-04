@@ -27,6 +27,16 @@ use crate::manifest::{Manifest, effective_project_name};
 ///
 /// Output files are written to `output_dir/<config-name>.k9`.
 pub fn generate_all(manifest: &Manifest, output_dir: &str) -> Result<()> {
+    generate_all_from(manifest, output_dir, Path::new("."))
+}
+
+/// Generate all K9 contracts, resolving source paths relative to `manifest_dir`.
+///
+/// When invoked from the CLI with `--manifest /some/project/k9iser.toml`,
+/// `manifest_dir` should be the parent directory of the manifest file so that
+/// `source = "config/app.toml"` resolves to `/some/project/config/app.toml`
+/// rather than `./config/app.toml` (which would be CWD-relative).
+pub fn generate_all_from(manifest: &Manifest, output_dir: &str, manifest_dir: &Path) -> Result<()> {
     let project_name = effective_project_name(manifest);
     let safety_tier =
         SafetyTier::from_str_loose(&manifest.project.safety_tier).unwrap_or(SafetyTier::Kennel);
@@ -38,9 +48,6 @@ pub fn generate_all(manifest: &Manifest, output_dir: &str) -> Result<()> {
         println!("  No config entries in manifest — nothing to generate.");
         return Ok(());
     }
-
-    // Resolve the manifest directory for relative source paths
-    let manifest_dir = Path::new(".");
 
     for cfg in &manifest.configs {
         let format = ConfigFormat::from_str_loose(&cfg.format).unwrap_or(ConfigFormat::Toml);
