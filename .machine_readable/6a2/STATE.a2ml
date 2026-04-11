@@ -1,42 +1,40 @@
-;; SPDX-License-Identifier: PMPL-1.0-or-later
-;; Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
-;; STATE.a2ml — Current project state for k9iser
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# STATE.a2ml — K9iser project state
+[metadata]
+project = "k9iser"
+version = "0.1.0"
+last-updated = "2026-03-21"
+status = "active"
+session = "converted from scheme — 2026-04-11"
 
-(state
-  (metadata
-    (version "0.1.0")
-    (last-updated "2026-03-21")
-    (author "Jonathan D.A. Jewell"))
+[project-context]
+name = "K9iser"
+purpose = """Analyse config files, infer constraints, generate K9 contracts, validate, and attest compliance"""
+completion-percentage = 45
 
-  (project-context
-    (name "k9iser")
-    (description "Analyse config files, infer constraints, generate K9 contracts, validate, and attest compliance")
-    (status "alpha")
-    (priority "high")
-    (ecosystem "-iser family (https://github.com/hyperpolymath/iseriser)"))
+[position]
+phase = "phase-1-complete"   # design | implementation | testing | maintenance | archived
+maturity = "experimental"  # experimental | alpha | beta | production | lts
 
-  (current-position
-    (phase "phase-1-complete")
-    (completion-percentage 45)
-    (milestone "Phase 1 complete — config parser, constraint inference, K9 codegen, validation")
-    (what-changed
-      "2026-03-21: Phase 1 complete. Multi-format config parser, constraint inference engine, K9 contract codegen, validation engine, bespoke manifest parsing. Integration tests passing."))
+[route-to-mvp]
+milestones = [
+  # No milestones recorded
+]
 
-  (route-to-mvp
-    (step 1 "DONE — Multi-format config parser (TOML, YAML, JSON, Nickel)")
-    (step 2 "DONE — Constraint inference engine (must/trust/dust/intend)")
-    (step 3 "DONE — K9 contract codegen emitting .k9.ncl files")
-    (step 4 "DONE — Validation engine checking configs against contracts")
-    (step 5 "DONE — Bespoke manifest parsing and CLI")
-    (step 6 "TODO — Cryptographic attestation for validation results")
-    (step 7 "TODO — Idris2 ABI proofs for constraint completeness and soundness")
-    (step 8 "TODO — Zig FFI bridge for validation engine hot path")
-    (step 9 "TODO — PanLL panel and BoJ cartridge integration"))
+[blockers-and-issues]
+issues = [
+  "Nickel parser requires nickel binary for validation — structural checks only for now",
+]
 
-  (blockers-and-issues
-    (note "Nickel parser requires nickel binary for validation — structural checks only for now"))
+[critical-next-actions]
+actions = [
+  "Implement cryptographic attestation for validation results",
+  "Write Idris2 ABI proofs for constraint completeness",
+  "Build Zig FFI bridge for hot-path validation",
+]
 
-  (critical-next-actions
-    (action "Implement cryptographic attestation for validation results")
-    (action "Write Idris2 ABI proofs for constraint completeness")
-    (action "Build Zig FFI bridge for hot-path validation")))
+[maintenance-status]
+last-run-utc = "2026-03-21T00:00:00Z"
+last-result = "unknown"  # unknown | pass | warn | fail
