@@ -279,7 +279,7 @@ mod tests {
 
     #[test]
     fn test_parse_must_rule_gt() {
-        let rule = parse_must_rule("port > 0").unwrap();
+        let rule = parse_must_rule("port > 0").expect("TODO: handle error");
         assert_eq!(rule.key, "port");
         assert_eq!(rule.operator, ">");
         assert_eq!(rule.value, "0");
@@ -287,7 +287,7 @@ mod tests {
 
     #[test]
     fn test_parse_must_rule_lt() {
-        let rule = parse_must_rule("port < 65536").unwrap();
+        let rule = parse_must_rule("port < 65536").expect("TODO: handle error");
         assert_eq!(rule.key, "port");
         assert_eq!(rule.operator, "<");
         assert_eq!(rule.value, "65536");
@@ -295,7 +295,7 @@ mod tests {
 
     #[test]
     fn test_parse_must_rule_ne() {
-        let rule = parse_must_rule("host != ''").unwrap();
+        let rule = parse_must_rule("host != ''").expect("TODO: handle error");
         assert_eq!(rule.key, "host");
         assert_eq!(rule.operator, "!=");
         assert_eq!(rule.value, "''");
@@ -303,14 +303,14 @@ mod tests {
 
     #[test]
     fn test_parse_trust_source() {
-        let trust = parse_trust_source("signed-by: ci-pipeline").unwrap();
+        let trust = parse_trust_source("signed-by: ci-pipeline").expect("TODO: handle error");
         assert_eq!(trust.trust_type, "signed-by");
         assert_eq!(trust.source, "ci-pipeline");
     }
 
     #[test]
     fn test_parse_dust_rule() {
-        let dust = parse_dust_rule("remove: deprecated-keys").unwrap();
+        let dust = parse_dust_rule("remove: deprecated-keys").expect("TODO: handle error");
         assert_eq!(dust.action, "remove");
         assert_eq!(dust.target, "deprecated-keys");
     }

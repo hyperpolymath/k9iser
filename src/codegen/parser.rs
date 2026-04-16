@@ -627,7 +627,7 @@ port = 8080
 host = "localhost"
 debug = true
 "#;
-        let entries = parse_toml(content).unwrap();
+        let entries = parse_toml(content).expect("TODO: handle error");
         assert!(entries.iter().any(|e| e.key == "server.port"
             && e.value == "8080"
             && e.value_type == ValueType::Int));
@@ -642,7 +642,7 @@ debug = true
     #[test]
     fn test_parse_json_simple() {
         let content = r#"{"port": 8080, "host": "localhost", "debug": true}"#;
-        let entries = parse_json(content).unwrap();
+        let entries = parse_json(content).expect("TODO: handle error");
         assert!(
             entries
                 .iter()
@@ -661,7 +661,7 @@ debug = true
     #[test]
     fn test_parse_yaml_simple() {
         let content = "server:\n  port: 8080\n  host: localhost\n  debug: true\n";
-        let entries = parse_yaml(content).unwrap();
+        let entries = parse_yaml(content).expect("TODO: handle error");
         assert!(entries.iter().any(|e| e.key == "server.port"
             && e.value == "8080"
             && e.value_type == ValueType::Int));
@@ -676,7 +676,7 @@ debug = true
     #[test]
     fn test_parse_ini_simple() {
         let content = "[server]\nport = 8080\nhost = localhost\ndebug = true\n";
-        let entries = parse_ini(content).unwrap();
+        let entries = parse_ini(content).expect("TODO: handle error");
         assert!(entries.iter().any(|e| e.key == "server.port"
             && e.value == "8080"
             && e.value_type == ValueType::Int));
