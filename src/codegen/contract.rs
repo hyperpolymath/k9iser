@@ -15,8 +15,16 @@ use crate::codegen::parser::{ParsedEntry, ValueType};
 ///
 /// The output format:
 /// ```text
+/// K9!
+/// # SPDX-License-Identifier: PMPL-1.0-or-later
 /// # Auto-generated K9 contract for <name>
 /// # Safety tier: <tier>
+///
+/// pedigree = {
+///   schema_version = "1.0.0"
+///   metadata = { name = "<name>" version = "1.0.0" }
+///   security = { leash = "<tier>" signature_required = false }
+/// }
 ///
 /// [must]
 /// key : type { constraint, ... }
@@ -41,9 +49,29 @@ pub fn generate_k9_contract(
 ) -> String {
     let mut output = String::new();
 
-    // Header
+    // Header — `K9!` MUST be the first non-empty line and a `pedigree`
+    // block is mandatory, per the canonical hyperpolymath/k9-validate-action.
+    output.push_str("K9!\n");
+    output.push_str("# SPDX-License-Identifier: PMPL-1.0-or-later\n");
     output.push_str(&format!("# Auto-generated K9 contract for {}\n", name));
     output.push_str(&format!("# Safety tier: {}\n", safety_tier));
+    output.push('\n');
+
+    // [pedigree] — provenance + security leash. Required fields:
+    //   metadata.name (error if absent), version/schema_version (warning),
+    //   security.leash ∈ {kennel,yard,hunt} (warning if absent), and a
+    //   signature field (error at hunt level if absent).
+    output.push_str("pedigree = {\n");
+    output.push_str("  schema_version = \"1.0.0\"\n");
+    output.push_str("  metadata = {\n");
+    output.push_str(&format!("    name = \"{}\"\n", name));
+    output.push_str("    version = \"1.0.0\"\n");
+    output.push_str("  }\n");
+    output.push_str("  security = {\n");
+    output.push_str(&format!("    leash = \"{}\"\n", safety_tier));
+    output.push_str("    signature_required = false\n");
+    output.push_str("  }\n");
+    output.push_str("}\n");
     output.push('\n');
 
     // [must] section — group rules by key, augment with type info from parsed entries
@@ -231,6 +259,12 @@ mod tests {
             ],
         );
 
+        // K9! magic must be the first non-empty line (k9-validate-action).
+        assert_eq!(content.lines().next(), Some("K9!"));
+        // Mandatory pedigree block with name + version + leash.
+        assert!(content.contains("pedigree = {"));
+        assert!(content.contains("name = \"app-config\""));
+        assert!(content.contains("leash = \"kennel\""));
         assert!(content.contains("# Auto-generated K9 contract for app-config"));
         assert!(content.contains("# Safety tier: kennel"));
         assert!(content.contains("[must]"));
