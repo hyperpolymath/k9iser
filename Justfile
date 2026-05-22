@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # k9iser — Wrap configs into self-validating K9 contracts
 
 # Default: build and test

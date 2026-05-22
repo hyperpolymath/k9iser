@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 // Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //
 // Manifest module for k9iser — parses k9iser.toml manifests that describe
@@ -215,7 +215,7 @@ pub fn init_manifest(path: &str) -> Result<()> {
     }
 
     let template = r#"# k9iser manifest — wrap configs into self-validating K9 contracts
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 
 [project]
 name = "my-config-project"

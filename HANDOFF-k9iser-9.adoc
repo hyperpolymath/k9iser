@@ -1,0 +1,70 @@
+= Handoff: k9iser#9 (Terminal-4 / k9iser adapter-drift lane)
+:date: 2026-05-18
+
+Written for the concurrent a2ml/k9/-iser adapter-drift session
+(runbook: project_a2ml_k9_validate_action_drift). Read-only summary —
+no merge performed, no files changed in this lane.
+
+== PR under inspection
+
+* *PR*: hyperpolymath/k9iser#9 — `fix(codegen): emit K9! magic line + pedigree block (closes #8)`
+* *Branch*: `fix/codegen-k9-magic-pedigree` -> `main`
+* *State*: OPEN, `mergeable: MERGEABLE`, `mergeStateStatus: UNSTABLE`
+* *Diff*: sound. Touches only `src/codegen/contract.rs` — emits `K9!`
+  magic first line + mandatory `pedigree { schema_version / metadata /
+  security.leash }` block, plus matching unit-test assertions. Matches
+  canonical k9-validate-action expectations. No concerns with the change itself.
+
+== Why CI is UNSTABLE (NOT caused by this PR)
+
+. *CodeQL Security Analysis* — `analyze (javascript-typescript, none)` — FAILURE +
+  "CodeQL job status was configuration error." Infra/config error, not a
+  code defect. This PR is Rust-only; there is no JS/TS for CodeQL to analyse.
+  Pre-existing configuration problem.
+
+. *Governance / Language / package anti-pattern policy* — FAILURE:
++
+----
+❌ ReScript files detected - use AffineScript instead
+./examples/SafeDOMExample.res
+----
++
+`examples/SafeDOMExample.res` is a *pre-existing* ReScript file in the repo.
+The PR diff does NOT touch it. This is estate ReScript-elimination drift
+that predates and is orthogonal to #9.
+
+. *Static Analysis Gate / "Deposit findings for gitbot-fleet"* — QUEUED
+  (never started). Known estate stuck-queued pattern; not a real failure.
+
+All other checks (Hypatia x2, panic-attack, governance security/quality/docs/
+well-known/workflow-linter, Guix/Nix policy) are SUCCESS.
+
+== Decision required (handed to you, per CAP + resolve-at-source policy)
+
+Both reds are pre-existing and unrelated to #9's payload, so this collides
+with two standing rules:
+
+* `feedback_resolve_at_source` — do not admin-merge past pre-existing reds;
+  root-cause them.
+* `feedback_rescript_handsoff` — k9iser is not excluded per se, but the fix
+  is the single targeted removal/port of `examples/SafeDOMExample.res`
+  (AffineScript->typed-wasm), which is a discrete decision, not a bulk op.
+
+Recommended path (not executed — out of this lane's scope and you own the
+adapter-drift thread that #9 sits in):
+
+. Port/remove `examples/SafeDOMExample.res` -> AffineScript (own commit,
+  `Refs #8`), which clears the Governance anti-pattern gate.
+. CodeQL config-error: it is a JS/TS analysis on a Rust repo. Either scope
+  CodeQL off this repo's languages or treat as the same infra class tracked
+  elsewhere; do NOT force a merge purely to bypass it.
+. Only then squash-merge `--admin --delete-branch`, `Refs` only.
+
+== Cross-lane constraints honoured
+
+* Did NOT touch hyperpolymath/affinescript, idaptik, or boj-server.
+* No branch/PR/merge made in this lane — inspection only.
+* Per runbook: do not joint-close #8 (`requirements-target`); do not close
+  idaptik#77 until K9 is green.
+
+— Terminal-4 lane, 2026-05-18
