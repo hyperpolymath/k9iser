@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 = Handoff: k9iser#9 (Terminal-4 / k9iser adapter-drift lane)
 :date: 2026-05-18
 

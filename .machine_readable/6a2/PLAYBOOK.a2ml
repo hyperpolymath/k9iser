@@ -17,7 +17,7 @@ target = "binary"  # binary CLI tool + library crate
 # 2. Review recent commits and CI results
 # 3. Run `just validate` to check compliance
 # 4. Run `just security` to audit for vulnerabilities
-# 5. Verify K9 contract templates in .machine_readable/contractiles/k9/ are intact
+# 5. Verify K9 contract templates in .machine_readable/contractiles/self-validating/ are intact
 
 [release-process]
 # 1. Update version in STATE.a2ml, META.a2ml, Cargo.toml, Justfile

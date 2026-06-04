@@ -59,9 +59,9 @@ Policy enforcement contracts (k9, dust, lust, must, trust).
 
 This directory is especially significant for k9iser — the K9 contract
 templates and validators live here:
-- `.machine_readable/contractiles/k9/` — K9 contract templates by tier
-- `.machine_readable/contractiles/k9/validators/` — K9 validator implementations
-- `.machine_readable/contractiles/k9/examples/` — Example K9 contracts
+- `.machine_readable/contractiles/self-validating/` — K9 contract templates by tier
+- `.machine_readable/contractiles/self-validating/validators/` — K9 validator implementations
+- `.machine_readable/contractiles/self-validating/examples/` — Example K9 contracts
 
 ### AI Configuration & Guides: `.machine_readable/ai/` ONLY
 
@@ -118,7 +118,7 @@ k9iser/
 ├── docs/                       # Technical documentation
 └── .machine_readable/          # ALL machine-readable metadata
     ├── 6a2/                    # STATE, META, ECOSYSTEM, AGENTIC, NEUROSYM, PLAYBOOK
-    ├── contractiles/k9/        # K9 contract templates and validators
+    ├── contractiles/self-validating/        # K9 contract templates and validators
     ├── anchors/                # ANCHOR.a2ml
     ├── policies/               # Maintenance policies
     └── bot_directives/         # Bot configuration

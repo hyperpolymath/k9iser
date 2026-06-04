@@ -1,4 +1,7 @@
-<!-- SPDX-License-Identifier: MPL-2.0 -->
+<!--
+SPDX-License-Identifier: MPL-2.0
+Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+-->
 <!-- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk> -->
 # k9iser Topology
 
@@ -42,7 +45,7 @@ k9iser
 │       └── abi/         ─── auto-generated C headers (from Idris2 ABI)
 │
 └── Contractiles (K9 Templates)
-    └── .machine_readable/contractiles/k9/
+    └── .machine_readable/contractiles/self-validating/
         ├── template-kennel.k9.ncl  ─── Kennel tier contract template
         ├── template-yard.k9.ncl    ─── Yard tier contract template
         ├── template-hunt.k9.ncl    ─── Hunt tier contract template
