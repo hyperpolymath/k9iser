@@ -1,6 +1,6 @@
 # Proof Requirements
 
-<!-- SPDX-License-Identifier: MPL-2.0 -->
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
 <!-- Created 2026-05-18 by estate proof-debt audit. -->
 
 ## Current state (2026-05-18)
