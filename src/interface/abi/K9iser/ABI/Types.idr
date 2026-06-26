@@ -14,6 +14,7 @@ module K9iser.ABI.Types
 import Data.Bits
 import Data.So
 import Data.Vect
+import Decidable.Equality
 
 %default total
 
@@ -26,11 +27,12 @@ public export
 data Platform = Linux | Windows | MacOS | BSD | WASM
 
 ||| Compile-time platform detection
+||| The platform this build targets. Defaults to Linux; the Rust/Zig build
+||| layer overrides this via codegen target selection. (Previously a
+||| `%runElab` stub that required ElabReflection and did not compile.)
 public export
 thisPlatform : Platform
-thisPlatform =
-  %runElab do
-    pure Linux  -- Default, override with compiler flags
+thisPlatform = Linux
 
 --------------------------------------------------------------------------------
 -- Result Codes
@@ -70,6 +72,9 @@ resultToInt ConstraintViolation = 6
 resultToInt TrustFailure = 7
 
 ||| Results are decidably equal
+||| Results are decidably equal. The off-diagonal cases discharge the
+||| disequality explicitly; the previous `decEq _ _ = No absurd` did not
+||| compile (no `Uninhabited (x = y)` instance exists for these).
 public export
 DecEq Result where
   decEq Ok Ok = Yes Refl
@@ -80,7 +85,62 @@ DecEq Result where
   decEq ParseError ParseError = Yes Refl
   decEq ConstraintViolation ConstraintViolation = Yes Refl
   decEq TrustFailure TrustFailure = Yes Refl
-  decEq _ _ = No absurd
+  decEq Ok Error = No (\case Refl impossible)
+  decEq Ok InvalidParam = No (\case Refl impossible)
+  decEq Ok OutOfMemory = No (\case Refl impossible)
+  decEq Ok NullPointer = No (\case Refl impossible)
+  decEq Ok ParseError = No (\case Refl impossible)
+  decEq Ok ConstraintViolation = No (\case Refl impossible)
+  decEq Ok TrustFailure = No (\case Refl impossible)
+  decEq Error Ok = No (\case Refl impossible)
+  decEq Error InvalidParam = No (\case Refl impossible)
+  decEq Error OutOfMemory = No (\case Refl impossible)
+  decEq Error NullPointer = No (\case Refl impossible)
+  decEq Error ParseError = No (\case Refl impossible)
+  decEq Error ConstraintViolation = No (\case Refl impossible)
+  decEq Error TrustFailure = No (\case Refl impossible)
+  decEq InvalidParam Ok = No (\case Refl impossible)
+  decEq InvalidParam Error = No (\case Refl impossible)
+  decEq InvalidParam OutOfMemory = No (\case Refl impossible)
+  decEq InvalidParam NullPointer = No (\case Refl impossible)
+  decEq InvalidParam ParseError = No (\case Refl impossible)
+  decEq InvalidParam ConstraintViolation = No (\case Refl impossible)
+  decEq InvalidParam TrustFailure = No (\case Refl impossible)
+  decEq OutOfMemory Ok = No (\case Refl impossible)
+  decEq OutOfMemory Error = No (\case Refl impossible)
+  decEq OutOfMemory InvalidParam = No (\case Refl impossible)
+  decEq OutOfMemory NullPointer = No (\case Refl impossible)
+  decEq OutOfMemory ParseError = No (\case Refl impossible)
+  decEq OutOfMemory ConstraintViolation = No (\case Refl impossible)
+  decEq OutOfMemory TrustFailure = No (\case Refl impossible)
+  decEq NullPointer Ok = No (\case Refl impossible)
+  decEq NullPointer Error = No (\case Refl impossible)
+  decEq NullPointer InvalidParam = No (\case Refl impossible)
+  decEq NullPointer OutOfMemory = No (\case Refl impossible)
+  decEq NullPointer ParseError = No (\case Refl impossible)
+  decEq NullPointer ConstraintViolation = No (\case Refl impossible)
+  decEq NullPointer TrustFailure = No (\case Refl impossible)
+  decEq ParseError Ok = No (\case Refl impossible)
+  decEq ParseError Error = No (\case Refl impossible)
+  decEq ParseError InvalidParam = No (\case Refl impossible)
+  decEq ParseError OutOfMemory = No (\case Refl impossible)
+  decEq ParseError NullPointer = No (\case Refl impossible)
+  decEq ParseError ConstraintViolation = No (\case Refl impossible)
+  decEq ParseError TrustFailure = No (\case Refl impossible)
+  decEq ConstraintViolation Ok = No (\case Refl impossible)
+  decEq ConstraintViolation Error = No (\case Refl impossible)
+  decEq ConstraintViolation InvalidParam = No (\case Refl impossible)
+  decEq ConstraintViolation OutOfMemory = No (\case Refl impossible)
+  decEq ConstraintViolation NullPointer = No (\case Refl impossible)
+  decEq ConstraintViolation ParseError = No (\case Refl impossible)
+  decEq ConstraintViolation TrustFailure = No (\case Refl impossible)
+  decEq TrustFailure Ok = No (\case Refl impossible)
+  decEq TrustFailure Error = No (\case Refl impossible)
+  decEq TrustFailure InvalidParam = No (\case Refl impossible)
+  decEq TrustFailure OutOfMemory = No (\case Refl impossible)
+  decEq TrustFailure NullPointer = No (\case Refl impossible)
+  decEq TrustFailure ParseError = No (\case Refl impossible)
+  decEq TrustFailure ConstraintViolation = No (\case Refl impossible)
 
 --------------------------------------------------------------------------------
 -- Safety Tiers
@@ -250,11 +310,18 @@ record ValidationResult where
   ||| Overall result code
   overallResult : Result
 
-||| Proof that validation counts are consistent
+||| Decide whether a validation result's counts are consistent, i.e. the
+||| pass/fail/skip counts sum to the total checked. This returns a genuine
+||| proof when it holds and Nothing otherwise. The previous signature asserted
+||| this for *every* `ValidationResult` unconditionally, which is false in
+||| general (the counts are independent FFI-supplied fields).
 public export
 validationConsistent : (vr : ValidationResult) ->
-                       So (vr.passCount + vr.failCount + vr.skipCount == vr.totalChecked)
-validationConsistent vr = ?validationConsistentProof
+                       Maybe (So (vr.passCount + vr.failCount + vr.skipCount == vr.totalChecked))
+validationConsistent vr =
+  case choose (vr.passCount + vr.failCount + vr.skipCount == vr.totalChecked) of
+    Left ok => Just ok
+    Right _ => Nothing
 
 --------------------------------------------------------------------------------
 -- Opaque Handles
@@ -266,12 +333,15 @@ public export
 data Handle : Type where
   MkHandle : (ptr : Bits64) -> {auto 0 nonNull : So (ptr /= 0)} -> Handle
 
-||| Safely create a handle from a pointer value
-||| Returns Nothing if pointer is null
+||| Safely create a handle from a pointer value. Uses `choose` to obtain a
+||| real `So (ptr /= 0)` witness for the non-null branch. (Previously
+||| `Just (MkHandle ptr)` left the `auto` proof unsolved and did not compile.)
 public export
 createHandle : Bits64 -> Maybe Handle
-createHandle 0 = Nothing
-createHandle ptr = Just (MkHandle ptr)
+createHandle ptr =
+  case choose (ptr /= 0) of
+    Left ok => Just (MkHandle ptr {nonNull = ok})
+    Right _ => Nothing
 
 ||| Extract pointer value from handle
 public export
@@ -309,10 +379,13 @@ ptrSize MacOS = 64
 ptrSize BSD = 64
 ptrSize WASM = 32
 
-||| Pointer type for platform
+||| Pointer type for platform. A pointer is represented as a pointer-sized
+||| unsigned integer, which matches `size_t` (`CSize`) on every supported
+||| platform. (Previously `Bits (ptrSize p)`, but `Bits` is a typeclass, not a
+||| `Nat -> Type` constructor, so that did not typecheck.)
 public export
 CPtr : Platform -> Type -> Type
-CPtr p _ = Bits (ptrSize p)
+CPtr p _ = CSize p
 
 --------------------------------------------------------------------------------
 -- Memory Layout Proofs
@@ -328,21 +401,22 @@ public export
 data HasAlignment : Type -> Nat -> Type where
   AlignProof : {0 t : Type} -> {n : Nat} -> HasAlignment t n
 
-||| Size of C types (platform-specific)
+||| Size of C types (platform-specific). The `CInt p` / `CSize p` aliases
+||| reduce to `Bits32` / `Bits64` before this function is applied, so they are
+||| handled by the concrete `Bits32` / `Bits64` clauses below; matching on the
+||| aliases directly is not possible (they are type-level functions, not
+||| constructors).
 public export
 cSizeOf : (p : Platform) -> (t : Type) -> Nat
-cSizeOf p (CInt _) = 4
-cSizeOf p (CSize _) = if ptrSize p == 64 then 8 else 4
 cSizeOf p Bits32 = 4
 cSizeOf p Bits64 = 8
 cSizeOf p Double = 8
 cSizeOf p _ = ptrSize p `div` 8
 
-||| Alignment of C types (platform-specific)
+||| Alignment of C types (platform-specific). See `cSizeOf` for why the
+||| `CInt` / `CSize` aliases are not matched directly.
 public export
 cAlignOf : (p : Platform) -> (t : Type) -> Nat
-cAlignOf p (CInt _) = 4
-cAlignOf p (CSize _) = if ptrSize p == 64 then 8 else 4
 cAlignOf p Bits32 = 4
 cAlignOf p Bits64 = 8
 cAlignOf p Double = 8
@@ -364,7 +438,7 @@ namespace Foreign
   export
   parseConfig : Handle -> ConfigFormat -> IO (Either Result Handle)
   parseConfig h fmt = do
-    let fmtInt = case fmt of
+    let fmtInt : Bits32 = case fmt of
           FormatTOML => 0
           FormatYAML => 1
           FormatJSON => 2
