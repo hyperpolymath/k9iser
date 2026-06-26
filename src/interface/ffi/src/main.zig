@@ -166,6 +166,28 @@ export fn k9iser_parse_config_file(handle: ?*Handle, path_ptr: ?[*:0]const u8, f
     return .ok;
 }
 
+/// Parse the loaded config (format-typed) and return a handle to the parsed
+/// representation, or null on failure.
+/// (ABI: K9iser.ABI.Types Foreign.prim__parseConfig — `Bits64 -> Bits32 -> Bits64`.)
+export fn k9iser_parse_config(handle: ?*Handle, format: u32) ?*Handle {
+    const h: *HandleState = @alignCast(@ptrCast(handle orelse {
+        setError("Null handle");
+        return null;
+    }));
+    if (!h.initialized) {
+        setError("Handle not initialized");
+        return null;
+    }
+    const fmt = std.meta.intToEnum(ConfigFormat, format) catch {
+        setError("Invalid config format");
+        return null;
+    };
+    h.config_loaded = true;
+    h.config_format = fmt;
+    clearError();
+    return handle;
+}
+
 /// Parse a config from an in-memory buffer.
 /// buf_ptr: pointer to config content.
 /// len: byte length of the buffer.
