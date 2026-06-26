@@ -58,7 +58,7 @@ prim__parseConfigFile : Bits64 -> Bits64 -> Bits32 -> PrimIO Bits32
 export
 parseConfigFile : Handle -> (pathPtr : Bits64) -> ConfigFormat -> IO (Either Result ())
 parseConfigFile h pathPtr fmt = do
-  let fmtInt = case fmt of
+  let fmtInt : Bits32 = case fmt of
         FormatTOML => 0
         FormatYAML => 1
         FormatJSON => 2
@@ -78,7 +78,7 @@ prim__parseConfigBuffer : Bits64 -> Bits64 -> Bits32 -> Bits32 -> PrimIO Bits32
 export
 parseConfigBuffer : Handle -> (bufPtr : Bits64) -> (len : Bits32) -> ConfigFormat -> IO (Either Result ())
 parseConfigBuffer h bufPtr len fmt = do
-  let fmtInt = case fmt of
+  let fmtInt : Bits32 = case fmt of
         FormatTOML => 0
         FormatYAML => 1
         FormatJSON => 2
@@ -157,7 +157,7 @@ prim__generateContract : Bits64 -> Bits32 -> PrimIO Bits32
 export
 generateContract : Handle -> SafetyTier -> IO (Either Result ())
 generateContract h tier = do
-  let tierInt = case tier of
+  let tierInt : Bits32 = case tier of
         Kennel => 0
         Yard => 1
         Hunt => 2

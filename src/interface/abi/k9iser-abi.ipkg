@@ -1,0 +1,11 @@
+-- SPDX-License-Identifier: MPL-2.0
+-- Idris2 package for the k9iser ABI formal proofs.
+-- Build/check with:  idris2 --build k9iser-abi.ipkg   (from src/interface/abi/)
+package k9iser-abi
+
+sourcedir = "."
+
+modules = K9iser.ABI.Types
+        , K9iser.ABI.Layout
+        , K9iser.ABI.Foreign
+        , K9iser.ABI.Proofs
