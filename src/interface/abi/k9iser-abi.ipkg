@@ -9,3 +9,4 @@ modules = K9iser.ABI.Types
         , K9iser.ABI.Layout
         , K9iser.ABI.Foreign
         , K9iser.ABI.Proofs
+        , K9iser.ABI.Semantics
