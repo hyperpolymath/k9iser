@@ -11,3 +11,4 @@ modules = K9iser.ABI.Types
         , K9iser.ABI.Proofs
         , K9iser.ABI.Semantics
         , K9iser.ABI.Invariants
+        , K9iser.ABI.FfiSeam
